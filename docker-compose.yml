@@ -1,0 +1,25 @@
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: youtube_manager_db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - '${DB_PORT}:3306'
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - youtube_manager_network
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  youtube_manager_network:
+    driver: bridge
