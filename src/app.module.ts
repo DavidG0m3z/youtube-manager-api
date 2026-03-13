@@ -6,6 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import youtubeConfig from './config/youtube.config';
+import { VideosModule } from './modules/videos/videos.module'; 
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import youtubeConfig from './config/youtube.config';
     }),
 
     ScheduleModule.forRoot(),
+    VideosModule,
   ],
   controllers: [],
   providers: [],
