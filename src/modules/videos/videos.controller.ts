@@ -6,6 +6,7 @@ import {
     HttpStatus,
     Param,
     ParseIntPipe,
+    Post,
 } from '@nestjs/common'
 import { VideosService } from './videos.service';
 import { VideoResponseDto } from './dto/video-response.dto';
@@ -16,6 +17,12 @@ export class videosController {
     constructor(
         private readonly videosService: VideosService
     ){}
+
+    @Post('sync_manual')
+    @HttpCode(HttpStatus.OK)
+    async syncManual(): Promise<{ synced: number }> {
+        return this.videosService.syncVideos()
+    }
 
     @Get()
     async findAll(): Promise<VideoResponseDto[]> {
@@ -30,7 +37,7 @@ export class videosController {
     }
 
     @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT) // 204 — operación exitosa sin body
+    @HttpCode(HttpStatus.NO_CONTENT)
     async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
       return this.videosService.remove(id);
     }
