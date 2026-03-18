@@ -47,4 +47,21 @@ export class VideosRepository {
         await this.repository.update(id, { isActive: false });
     }
 
+    async upsert(videoData: Partial<Video>): Promise<void> {
+
+        await this.repository.upsert(videoData, {
+            conflictPaths: ['youtubeId'],
+            skipUpdateIfNoValuesChanged: true,
+        });
+    }
+
+    async upsertMany(videos: Partial<Video>[]): Promise<void> {
+        if (videos.length === 0) return;
+
+        await this.repository.upsert(videos, {
+            conflictPaths: ['youtubeId'],
+            skipUpdateIfNoValuesChanged: true,
+        });
+    }
+
 }

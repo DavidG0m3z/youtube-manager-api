@@ -55,8 +55,11 @@ export class YoutubeService {
         ),
       );
 
-      const uploadsId =
-        response.data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+
+      this.logger.debug(`Channel API response: ${JSON.stringify(response.data)}`);
+
+
+      const uploadsId = response.data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
 
       if (!uploadsId) {
         throw new HttpException(
@@ -67,6 +70,7 @@ export class YoutubeService {
 
       return uploadsId;
     } catch (error) {
+      this.logger.error(`Full error: ${JSON.stringify(error?.response?.data)}`);
       this.handleYoutubeError(error, 'getUploadsPlaylistId');
     }
   }

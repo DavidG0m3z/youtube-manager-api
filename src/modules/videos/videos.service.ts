@@ -1,15 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { VideosRepository } from './videos.repository';
 import { VideoResponseDto } from './dto/video-response.dto';
 import { Video } from './entities/video.entity';
+import { VideoMapper } from './mapper/video.mapper';
+import { YoutubeService } from '../youtube/youtube.service';
 
 @Injectable()
 export class VideosService {
 
+    private readonly logger = new Logger(VideosService.name);
+
     constructor(
-        private readonly videosRepository: VideosRepository
+        private readonly videosRepository: VideosRepository,
+        private readonly YoutubeService: YoutubeService
     ){}
+
+    async syncVideos(): Promise<{synced: number}>{
+        this.logger.log('Starting video sync...')
+
+        const youtubeVideos = await this.YoutubeService.fetchAllVideos();
+
+        const videosToSync = youtubeVideos.map((ytVideo) => 
+            VideoMapper.fromYoutube(ytVideo),
+        );
+
+        await this.videosRepository.upsertMany(videosToSync);
+        this.logger.log(`Synn completed, videsos syncronicde: ${videosToSync.length}`);
+
+        return { synced: videosToSync.length };
+    }
 
     async findAll(): Promise<VideoResponseDto[]> {
         const videos = await this.videosRepository.findAll();
