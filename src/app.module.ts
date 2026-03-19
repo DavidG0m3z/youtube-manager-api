@@ -7,6 +7,7 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import youtubeConfig from './config/youtube.config';
 import { VideosModule } from './modules/videos/videos.module'; 
+import { DownloaderModule } from './modules/downloader/downloader.module'; 
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { VideosModule } from './modules/videos/videos.module';
 
     ScheduleModule.forRoot(),
     VideosModule,
+    DownloaderModule,
   ],
   controllers: [],
   providers: [],
