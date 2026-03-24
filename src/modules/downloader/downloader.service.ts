@@ -140,7 +140,11 @@ export class DownloaderService {
     };
   }
 
-  private downloadWorker(url: string, quality: string, downloadId: string) {
+  private async downloadWorker(
+    url: string,
+    quality: string,
+    downloadId: string,
+  ) {
     const formatMap: Record<string, string> = {
       best4k:
         'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/best[height<=2160]',

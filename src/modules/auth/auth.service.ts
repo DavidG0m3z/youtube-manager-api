@@ -13,67 +13,64 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class AuthService {
-    
-    constructor(
-        private readonly usersRepository: UsersRepository,
-        private readonly jwtService: JwtService,
-    ){}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-        const emailExist = await this.usersRepository.existsByEmail(
-            registerDto.email,
-        );
+  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
+    const emailExist = await this.usersRepository.existsByEmail(
+      registerDto.email,
+    );
 
-        if (emailExist) {
-            throw new ConflictException('Email exist')
-        }
-
-        const passwordHash = await bcrypt.hash(registerDto.password, 10);
-        
-        const user = await this.usersRepository.create({
-            email:registerDto.email,
-            passwordHash,
-            role: registerDto.role,
-        });
-
-        return this.buildAuthResponse(user)
+    if (emailExist) {
+      throw new ConflictException('El correo ya existe');
     }
 
-    async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-        
-        const user = await this.usersRepository.findByEmail(loginDto.email);
+    const passwordHash = await bcrypt.hash(registerDto.password, 10);
 
-        if(!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+    const user = await this.usersRepository.create({
+      email: registerDto.email,
+      passwordHash,
+      role: registerDto.role,
+    });
 
-        const isPasswordValid = await bcrypt.compare(
-            loginDto.password,
-            user.passwordHash,
-        );
+    return this.buildAuthResponse(user);
+  }
 
-        if(!isPasswordValid) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    const user = await this.usersRepository.findByEmail(loginDto.email);
 
-        return this.buildAuthResponse(user);
+    if (!user) {
+      throw new UnauthorizedException('Credenciales invalidas');
     }
 
-    private buildAuthResponse(user: User): AuthResponseDto {
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.passwordHash,
+    );
 
-        const payload = {
-          sub: user.id,      
-          email: user.email,
-          role: user.role,
-        };
-
-        return {
-          accessToken: this.jwtService.sign(payload),
-          user: {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-          },
-        };
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales invalidas');
     }
+
+    return this.buildAuthResponse(user);
+  }
+
+  private buildAuthResponse(user: User): AuthResponseDto {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
 }
