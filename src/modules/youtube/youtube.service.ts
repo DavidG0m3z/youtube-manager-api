@@ -8,7 +8,6 @@ import {
   YoutubeVideoItemDto,
   YoutubeVideosResponseDto,
 } from './dto/youtube-videos.dto'
-import { promises } from 'dns';
 
 @Injectable()
 export class YoutubeService {

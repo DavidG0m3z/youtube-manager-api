@@ -17,6 +17,7 @@ import { Role } from '../auth/enums/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('videos')
+@UseGuards(AuthGuard('jwt'))
 export class videosController {
 
     constructor(

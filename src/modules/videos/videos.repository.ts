@@ -47,6 +47,14 @@ export class VideosRepository {
         await this.repository.update(id, { isActive: false });
     }
 
+    async findDeletedYoutubeIdes(): Promise<string[]> {
+        const deletedVideos = await this.repository.find({
+            where: { isActive: false },
+            select: ['youtubeId'],
+        });
+        return deletedVideos.map((video) => video.youtubeId);
+    }
+
     async upsert(videoData: Partial<Video>): Promise<void> {
 
         await this.repository.upsert(videoData, {
