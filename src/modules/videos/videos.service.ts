@@ -21,11 +21,21 @@ export class VideosService {
 
         const youtubeVideos = await this.YoutubeService.fetchAllVideos();
 
-        const videosToSync = youtubeVideos.map((ytVideo) => 
-            VideoMapper.fromYoutube(ytVideo),
+        const deleteYoutubeIds = await this.videosRepository.findDeletedYoutubeIdes();
+
+        const videosToSync = youtubeVideos
+            .filter((ytVideo) => !deleteYoutubeIds.includes(ytVideo.id))
+            .map((ytVideo) => VideoMapper.fromYoutube(ytVideo),
+        );
+
+        this.logger.log(
+          `Videos from YouTube: ${youtubeVideos.length} | ` +
+          `Skipped (deleted locally): ${youtubeVideos.length - videosToSync.length} | ` +
+          `To sync: ${videosToSync.length}`
         );
 
         await this.videosRepository.upsertMany(videosToSync);
+        
         this.logger.log(`Synn completed, videsos syncronicde: ${videosToSync.length}`);
 
         return { synced: videosToSync.length };
