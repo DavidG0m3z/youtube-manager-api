@@ -7,9 +7,13 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import youtubeConfig from './config/youtube.config';
 import { VideosModule } from './modules/videos/videos.module'; 
+<<<<<<< HEAD
 import { AuthModule } from './modules/auth/auth.module';
 
 
+=======
+import { DownloaderModule } from './modules/downloader/downloader.module'; 
+>>>>>>> 158c4c6131cb8b895c54d312ce25056a116d1160
 
 @Module({
   imports: [
@@ -37,7 +41,11 @@ import { AuthModule } from './modules/auth/auth.module';
 
     ScheduleModule.forRoot(),
     VideosModule,
+<<<<<<< HEAD
     AuthModule,
+=======
+    DownloaderModule,
+>>>>>>> 158c4c6131cb8b895c54d312ce25056a116d1160
   ],
   controllers: [],
   providers: [],
