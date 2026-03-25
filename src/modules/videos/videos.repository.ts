@@ -47,7 +47,7 @@ export class VideosRepository {
         await this.repository.update(id, { isActive: false });
     }
 
-    async findDeletedYoutubeIdes(): Promise<string[]> {
+    async findDeletedYoutubeIds(): Promise<string[]> {
         const deletedVideos = await this.repository.find({
             where: { isActive: false },
             select: ['youtubeId'],
