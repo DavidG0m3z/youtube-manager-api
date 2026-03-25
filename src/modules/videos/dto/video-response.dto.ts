@@ -26,7 +26,7 @@ export class VideoResponseDto {
   duration: string;
 
   @Expose()
-  resolution: string;
+  resolution: string[];
 
   @Expose()
   orientation: string;
@@ -51,5 +51,4 @@ export class VideoResponseDto {
 
   @Expose()
   updatedAt: Date;
-
 }

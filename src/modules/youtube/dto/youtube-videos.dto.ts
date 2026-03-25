@@ -1,6 +1,5 @@
-
 export interface YoutubeChannelResponseDto {
-    items: Array<{
+  items: Array<{
     contentDetails: {
       relatedPlaylists: {
         uploads: string;
@@ -10,14 +9,14 @@ export interface YoutubeChannelResponseDto {
 }
 
 export interface YoutubePlaylistResponseDto {
-    nextPageToken?: string;
-    items: Array<{
-        snippet: {
-            resourceId: {
-                videoId: string;
-            };
-        };
-    }>;
+  nextPageToken?: string;
+  items: Array<{
+    snippet: {
+      resourceId: {
+        videoId: string;
+      };
+    };
+  }>;
 }
 
 export interface YoutubeVideoItemDto {
@@ -39,5 +38,5 @@ export interface YoutubeVideoItemDto {
 }
 
 export interface YoutubeVideosResponseDto {
-    items: YoutubeVideoItemDto[];
+  items: YoutubeVideoItemDto[];
 }

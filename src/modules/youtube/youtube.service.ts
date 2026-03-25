@@ -7,24 +7,27 @@ import {
   YoutubePlaylistResponseDto,
   YoutubeVideoItemDto,
   YoutubeVideosResponseDto,
-} from './dto/youtube-videos.dto'
+} from './dto/youtube-videos.dto';
 
 @Injectable()
 export class YoutubeService {
-    private readonly logger = new Logger(YoutubeService.name);
-    private readonly BASE_URL = 'https://www.googleapis.com/youtube/v3';
-    private readonly apiKey: string;
-    private readonly channelId: string;
+  private readonly logger = new Logger(YoutubeService.name);
+  private readonly BASE_URL = 'https://www.googleapis.com/youtube/v3';
+  private readonly apiKey: string;
+  private readonly channelId: string;
 
-    constructor(
-        private readonly httpService: HttpService,
-        private readonly configService: ConfigService
-    ){
-        this.apiKey = this.configService.getOrThrow<string>('youtube.apiKey');
-        this.channelId = this.configService.getOrThrow<string>('youtube.channelId');
-    }
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.apiKey = this.configService.getOrThrow<string>('youtube.apiKey');
+    this.channelId = this.configService.getOrThrow<string>('youtube.channelId');
+  }
 
-    async fetchAllVideos(): Promise<YoutubeVideoItemDto[]> {
+  async fetchAllVideos(): Promise<YoutubeVideoItemDto[]> {
+    console.log('API KEY: ', this.apiKey);
+    console.log('CHANNEL ID: ', this.channelId);
+
     this.logger.log('Starting full channel sync...');
 
     const uploadsPlaylistId = await this.getUploadsPlaylistId();
@@ -54,11 +57,12 @@ export class YoutubeService {
         ),
       );
 
+      this.logger.debug(
+        `Channel API response: ${JSON.stringify(response.data)}`,
+      );
 
-      this.logger.debug(`Channel API response: ${JSON.stringify(response.data)}`);
-
-
-      const uploadsId = response.data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+      const uploadsId =
+        response.data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
 
       if (!uploadsId) {
         throw new HttpException(
@@ -123,7 +127,7 @@ export class YoutubeService {
             {
               params: {
                 part: 'snippet,contentDetails',
-                id: chunk.join(','), 
+                id: chunk.join(','),
                 key: this.apiKey,
               },
             },
@@ -138,7 +142,6 @@ export class YoutubeService {
 
     return allVideos;
   }
-
 
   private chunkArray<T>(array: T[], size: number): T[][] {
     const chunks: T[][] = [];
@@ -170,6 +173,4 @@ export class YoutubeService {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
-
 }
-
