@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { VideosService } from './videos.service';
@@ -28,8 +29,8 @@ export class videosController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Roles(Role.ADMIN)
-  async syncManual(): Promise<{ synced: number }> {
-    return this.videosService.syncVideos();
+  async syncManual(@Req() req): Promise<{ synced: number }> {
+    return this.videosService.syncVideos(req.user.id);
   }
 
   @Get()

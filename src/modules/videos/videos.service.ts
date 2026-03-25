@@ -6,6 +6,7 @@ import { UpdateVideoDto } from './dto/update-video.dto';
 import { Video } from './entities/video.entity';
 import { VideoMapper } from './mapper/video.mapper';
 import { YoutubeService } from '../youtube/youtube.service';
+import { GoogleService } from '../google/google.service';
 
 @Injectable()
 export class VideosService {
@@ -14,12 +15,22 @@ export class VideosService {
   constructor(
     private readonly videosRepository: VideosRepository,
     private readonly YoutubeService: YoutubeService,
+    private readonly googleService: GoogleService,
   ) {}
 
-  async syncVideos(): Promise<{ synced: number }> {
-    this.logger.log('Starting video sync...');
+  async syncVideos(userId: number): Promise<{ synced: number }> {
+    this.logger.log(`Starting video sync for user ${userId}...`);
 
-    const youtubeVideos = await this.YoutubeService.fetchAllVideos();
+    let authClient: any = null;
+    try {
+      authClient = await this.googleService.getAuthorizedClient(userId);
+    } catch (e) {
+      this.logger.warn(
+        `Could not get authorized client for user ${userId}: ${e.message}. Falling back to public API.`,
+      );
+    }
+
+    const youtubeVideos = await this.YoutubeService.fetchAllVideos(authClient);
 
     const deleteYoutubeIds =
       await this.videosRepository.findDeletedYoutubeIds();

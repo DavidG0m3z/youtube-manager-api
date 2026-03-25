@@ -1,8 +1,9 @@
 export class AuthResponseDto {
-    accessToken: string;
-    user: {
-        id: number;
-        email: string;
-        role: string;
-    };
+  accessToken: string;
+  user: {
+    id: number;
+    email: string;
+    role: string;
+    googleAccessToken: string;
+  };
 }

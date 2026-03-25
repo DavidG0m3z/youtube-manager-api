@@ -24,41 +24,44 @@ export class YoutubeService {
     this.channelId = this.configService.getOrThrow<string>('youtube.channelId');
   }
 
-  async fetchAllVideos(): Promise<YoutubeVideoItemDto[]> {
-    console.log('API KEY: ', this.apiKey);
-    console.log('CHANNEL ID: ', this.channelId);
-
+  async fetchAllVideos(authClient?: any): Promise<YoutubeVideoItemDto[]> {
     this.logger.log('Starting full channel sync...');
 
-    const uploadsPlaylistId = await this.getUploadsPlaylistId();
+    let token: string | null = null;
+    if (authClient && typeof authClient.getAccessToken === 'function') {
+      const credentials = await authClient.getAccessToken();
+      token = credentials.token;
+      this.logger.log('Using Google OAuth token for synchronization');
+    }
+
+    console.log('Token: ', token);
+
+    const uploadsPlaylistId = await this.getUploadsPlaylistId(token);
     this.logger.log(`Uploads playlist ID: ${uploadsPlaylistId}`);
 
-    const videoIds = await this.getAllVideoIds(uploadsPlaylistId);
+    const videoIds = await this.getAllVideoIds(uploadsPlaylistId, token);
     this.logger.log(`Total videos found: ${videoIds.length}`);
 
-    const videos = await this.getVideosDetails(videoIds);
+    const videos = await this.getVideosDetails(videoIds, token);
     this.logger.log(`Videos fetched successfully: ${videos.length}`);
 
     return videos;
   }
 
-  private async getUploadsPlaylistId(): Promise<string> {
+  private async getUploadsPlaylistId(token: string | null): Promise<string> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<YoutubeChannelResponseDto>(
           `${this.BASE_URL}/channels`,
           {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
             params: {
               part: 'contentDetails',
               id: this.channelId,
-              key: this.apiKey,
+              ...(!token && { key: this.apiKey }),
             },
           },
         ),
-      );
-
-      this.logger.debug(
-        `Channel API response: ${JSON.stringify(response.data)}`,
       );
 
       const uploadsId =
@@ -73,12 +76,14 @@ export class YoutubeService {
 
       return uploadsId;
     } catch (error) {
-      this.logger.error(`Full error: ${JSON.stringify(error?.response?.data)}`);
       this.handleYoutubeError(error, 'getUploadsPlaylistId');
     }
   }
 
-  private async getAllVideoIds(playlistId: string): Promise<string[]> {
+  private async getAllVideoIds(
+    playlistId: string,
+    token: string | null,
+  ): Promise<string[]> {
     const videoIds: string[] = [];
     let nextPageToken: string | undefined = undefined;
 
@@ -88,11 +93,12 @@ export class YoutubeService {
           this.httpService.get<YoutubePlaylistResponseDto>(
             `${this.BASE_URL}/playlistItems`,
             {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
               params: {
                 part: 'snippet',
                 playlistId,
                 maxResults: 50,
-                key: this.apiKey,
+                ...(!token && { key: this.apiKey }),
                 ...(nextPageToken && { pageToken: nextPageToken }),
               },
             },
@@ -115,6 +121,7 @@ export class YoutubeService {
 
   private async getVideosDetails(
     videoIds: string[],
+    token: string | null,
   ): Promise<YoutubeVideoItemDto[]> {
     const chunks = this.chunkArray(videoIds, 50);
     const allVideos: YoutubeVideoItemDto[] = [];
@@ -125,10 +132,11 @@ export class YoutubeService {
           this.httpService.get<YoutubeVideosResponseDto>(
             `${this.BASE_URL}/videos`,
             {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
               params: {
                 part: 'snippet,contentDetails',
                 id: chunk.join(','),
-                key: this.apiKey,
+                ...(!token && { key: this.apiKey }),
               },
             },
           ),

@@ -34,4 +34,8 @@ export class UsersRepository {
         });
         return count > 0;
     }
+
+    async update(id: number, userData: Partial<User>): Promise<void> {
+        await this.repository.update(id, userData);
+    }
 }

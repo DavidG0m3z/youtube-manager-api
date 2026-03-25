@@ -9,6 +9,7 @@ import youtubeConfig from './config/youtube.config';
 import { VideosModule } from './modules/videos/videos.module';
 import { DownloaderModule } from './modules/downloader/downloader.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { GoogleModule } from './modules/google/google.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AuthModule } from './modules/auth/auth.module';
     VideosModule,
     DownloaderModule,
     AuthModule,
+    GoogleModule,
   ],
   controllers: [],
   providers: [],
