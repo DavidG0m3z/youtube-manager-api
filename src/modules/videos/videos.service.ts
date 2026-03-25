@@ -21,7 +21,7 @@ export class VideosService {
 
         const youtubeVideos = await this.YoutubeService.fetchAllVideos();
 
-        const deleteYoutubeIds = await this.videosRepository.findDeletedYoutubeIdes();
+        const deleteYoutubeIds = await this.videosRepository.findDeletedYoutubeIds();
 
         const videosToSync = youtubeVideos
             .filter((ytVideo) => !deleteYoutubeIds.includes(ytVideo.id))
