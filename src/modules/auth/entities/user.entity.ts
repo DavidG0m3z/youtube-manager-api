@@ -46,21 +46,21 @@ export class User {
     type: 'text',
     nullable: true,
   })
-  googleAccessToken: string;
+  googleAccessToken: string | null;
 
   @Column({
     name: 'google_refresh_token',
     type: 'text',
     nullable: true,
   })
-  googleRefreshToken: string;
+  googleRefreshToken: string | null;
 
   @Column({
     name: 'google_expiry_date',
     type: 'bigint',
     nullable: true,
   })
-  googleExpiryDate: number;
+  googleExpiryDate: number | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

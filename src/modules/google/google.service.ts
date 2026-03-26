@@ -64,4 +64,17 @@ export class GoogleService {
 
     return client;
   }
+
+  async unlinkAccount(userId: number) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+    await this.usersRepository.update(userId, {
+      googleAccessToken: null,
+      googleRefreshToken: null,
+      googleExpiryDate: null,
+    });
+    this.logger.log(`Cuenta desvinculada correctamente user: ${userId}`);
+  }
 }

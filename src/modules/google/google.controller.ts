@@ -48,4 +48,13 @@ export class GoogleController {
         .send('Error vinculando la cuenta de Google: ' + error.message);
     }
   }
+
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Roles(Role.ADMIN)
+  @Get('account/unlink')
+  async unlink(@Req() req) {
+    console.log(req.user);
+    await this.googleService.unlinkAccount(req.user.id);
+    return { message: 'Cuenta de Google desvinculada correctamente' };
+  }
 }

@@ -4,6 +4,6 @@ export class AuthResponseDto {
     id: number;
     email: string;
     role: string;
-    googleAccessToken: string;
+    googleAccessToken: string | null;
   };
 }
