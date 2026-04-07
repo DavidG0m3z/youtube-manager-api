@@ -29,7 +29,7 @@ import { GoogleModule } from './modules/google/google.module';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<string>('app.nodeEnv') === 'development',
+        synchronize: true,
         logging: configService.get<string>('app.nodeEnv') === 'development',
       }),
       inject: [ConfigService],
