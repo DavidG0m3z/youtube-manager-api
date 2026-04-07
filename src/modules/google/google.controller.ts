@@ -40,7 +40,7 @@ export class GoogleController {
       await this.googleService.handleCallback(code, state);
       //  Redirigir al frontend
       return res.redirect(
-        `${process.env.URL_FRONT}/redirect-google?success=true&code=${code}&state=${state}`,
+        `${process.env.URL_FRONT}/#/redirect-google?success=true&code=${code}&state=${state}`,
       );
     } catch (error) {
       return res
