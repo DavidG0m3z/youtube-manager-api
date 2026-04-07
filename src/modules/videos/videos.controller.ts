@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
+  DefaultValuePipe,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -34,8 +36,26 @@ export class videosController {
   }
 
   @Get()
-  async findAll(): Promise<VideoResponseDto[]> {
-    return this.videosService.findAll();
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('resolution') resolution?: string,
+    @Query('fps') fps?: string,
+    @Query('headquarters') headquarters?: string,
+    @Query('orientation') orientation?: string,
+  ): Promise<{ data: VideoResponseDto[]; meta: any }> {
+    const parsedFps = fps && !isNaN(parseInt(fps)) ? parseInt(fps) : undefined;
+
+    return this.videosService.findAll(
+      page,
+      limit,
+      search,
+      resolution,
+      parsedFps,
+      headquarters,
+      orientation,
+    );
   }
 
   @Get(':id')

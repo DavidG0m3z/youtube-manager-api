@@ -54,9 +54,35 @@ export class VideosService {
     return { synced: videosToSync.length };
   }
 
-  async findAll(): Promise<VideoResponseDto[]> {
-    const videos = await this.videosRepository.findAll();
-    return this.mapToResponseDtoList(videos);
+  async findAll(
+    page: number = 1,
+    limit: number = 12,
+    search?: string,
+    resolution?: string,
+    fps?: number,
+    headquarters?: string,
+    orientation?: string,
+  ): Promise<{ data: VideoResponseDto[]; meta: any }> {
+    const skip = (page - 1) * limit;
+    const [videos, total] = await this.videosRepository.findAll(
+      limit,
+      skip,
+      search,
+      resolution,
+      fps,
+      headquarters,
+      orientation
+    );
+
+    return {
+      data: this.mapToResponseDtoList(videos),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findById(id: number): Promise<VideoResponseDto> {
