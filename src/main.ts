@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import * as crypto from 'crypto';
+import { webcrypto } from 'crypto';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-(global as any).crypto = crypto;
+if (!(global as any).crypto) {
+  (global as any).crypto = webcrypto;
+}
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
