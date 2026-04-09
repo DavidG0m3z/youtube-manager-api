@@ -66,7 +66,7 @@ export class DownloaderService {
       const formatDict: Record<number, boolean> = {};
       if (videoInfo.formats) {
         for (const fmt of videoInfo.formats) {
-          if (fmt.vcodec !== 'none' && fmt.ext === 'mp4') {
+          if (fmt.vcodec !== 'none') {
             const height = fmt.height || 0;
             if (height >= 720) {
               formatDict[height] = true;
@@ -146,29 +146,30 @@ export class DownloaderService {
     downloadId: string,
   ) {
     const formatMap: Record<string, string> = {
-      best4k:
-        'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/best[height<=2160]',
-      best1440:
-        'bestvideo[height<=1440][ext=mp4]+bestaudio[ext=m4a]/best[height<=1440]',
-      best1080:
-        'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]',
-      best720:
-        'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]',
-      best: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+      best4k: 'bestvideo[height<=2160]+bestaudio/best[height<=2160]',
+      best1440: 'bestvideo[height<=1440]+bestaudio/best[height<=1440]',
+      best1080: 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+      best720: 'bestvideo[height<=720]+bestaudio/best[height<=720]',
+      best: 'bestvideo+bestaudio/best',
     };
 
     const formatString = formatMap[quality] || formatMap['best'];
 
     const filePath = path.join(this.downloadFolder, `${downloadId}.mp4`);
 
+    const isWin = os.platform() === 'win32';
+    const quote = (str: string) => (isWin ? `"${str}"` : str);
+
     const args: any = {
       noCheckCertificates: true,
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      f: formatString,
+      userAgent: quote(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      ),
+      f: quote(formatString),
       mergeOutputFormat: 'mp4',
-      o: filePath,
+      o: quote(filePath),
       newline: true,
-      ffmpegLocation: ffmpegLoc,
+      ffmpegLocation: quote(ffmpegLoc || ''),
       jsRuntimes: 'node',
     };
 
