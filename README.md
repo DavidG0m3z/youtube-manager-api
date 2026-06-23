@@ -1,98 +1,165 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# youtube-manager-api
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST desarrollada con **NestJS** que permite integrar videos de un canal privado de YouTube directamente en una plataforma universitaria, eliminando la necesidad de que los usuarios abandonen el sistema para acceder al contenido multimedia.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Problema que resuelve
 
-## Description
+La plataforma virtual de la universidad tenía un flujo de UX roto: cada vez que se publicaba un video explicativo, los usuarios eran redirigidos a YouTube, perdiendo el contexto de la plataforma. Este backend resuelve ese problema sincronizando los videos del canal de YouTube directamente a la base de datos de la plataforma, permitiendo consumirlos sin salir del entorno universitario.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Stack tecnológico
 
-## Project setup
+| Tecnología | Uso |
+|---|---|
+| NestJS 11 | Framework principal |
+| TypeScript | Lenguaje |
+| TypeORM | ORM |
+| MySQL | Base de datos |
+| JWT + Passport | Autenticación y autorización |
+| Google APIs (googleapis) | OAuth2 + YouTube Data API |
+| youtube-dl-exec | Descarga de videos |
+| ffmpeg-static | Procesamiento de video |
+| @nestjs/schedule | Tareas programadas (sync automático) |
 
-```bash
-$ npm install
+## Características principales
+
+- **Sincronización de videos** desde un canal privado de YouTube vía YouTube Data API
+- **OAuth2 con Google** — el admin vincula su cuenta de Google para autorizar el acceso al canal privado
+- **Descarga de videos** con soporte de calidad configurable y entrega como stream descargable
+- **CRUD de videos** con paginación, búsqueda y filtros por resolución, FPS, sede y orientación
+- **Soft delete** — los videos eliminados localmente no se re-sincronizan en futuros syncs
+- **Roles de usuario** — guards de `ADMIN` protegen las operaciones sensibles
+- **Sincronización manual** disponible por endpoint para admins
+
+## Endpoints
+
+### Auth
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/v1/auth/register` | Registrar usuario |
+| POST | `/api/v1/auth/login` | Login, retorna JWT |
+
+### Google OAuth2
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/google/connect` | Genera URL de autorización OAuth2 | JWT + ADMIN |
+| GET | `/api/v1/google/callback` | Callback de Google, guarda tokens | — |
+| GET | `/api/v1/google/account/unlink` | Desvincula cuenta de Google | JWT + ADMIN |
+
+### Videos
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/videos` | Listar videos (paginado + filtros) | JWT |
+| GET | `/api/v1/videos/:id` | Obtener video por ID | JWT |
+| POST | `/api/v1/videos/sync_manual` | Sincronizar videos desde YouTube | JWT + ADMIN |
+| PATCH | `/api/v1/videos/:id` | Actualizar metadata de un video | JWT + ADMIN |
+| DELETE | `/api/v1/videos/:id` | Soft delete de un video | JWT + ADMIN |
+
+### Downloader
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/v1/downloader/info` | Obtener info de un video por URL |
+| POST | `/api/v1/downloader/download` | Iniciar descarga de un video |
+| GET | `/api/v1/downloader/status/:id` | Consultar estado de una descarga |
+| GET | `/api/v1/downloader/file/:id` | Descargar el archivo (stream) |
+
+### Query params disponibles en `GET /videos`
+
+| Param | Tipo | Descripción |
+|---|---|---|
+| `page` | number | Página (default: 1) |
+| `limit` | number | Items por página (default: 12) |
+| `search` | string | Búsqueda por texto |
+| `resolution` | string | Filtrar por resolución |
+| `fps` | number | Filtrar por FPS |
+| `headquarters` | string | Filtrar por sede |
+| `orientation` | string | Filtrar por orientación |
+
+## Instalación y ejecución
+
+### Prerrequisitos
+
+- Node.js >= 18
+- MySQL corriendo localmente o en Docker
+- Credenciales de Google OAuth2 (Google Cloud Console)
+
+### Variables de entorno
+
+Crear un archivo `.env` en la raíz del proyecto:
+
+```env
+# App
+APP_PORT=3028
+
+# Base de datos
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=tu_password
+DB_NAME=youtube_manager
+
+# JWT
+JWT_SECRET=tu_jwt_secret
+
+# Google OAuth2
+GOOGLE_CLIENT_ID=tu_client_id
+GOOGLE_CLIENT_SECRET=tu_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3028/api/v1/google/callback
+
+# Frontend
+URL_FRONT=http://localhost:5173
 ```
 
-## Compile and run the project
+### Pasos
 
 ```bash
-# development
-$ npm run start
+# Instalar dependencias
+npm install
 
-# watch mode
-$ npm run start:dev
+# Modo desarrollo
+npm run dev
 
-# production mode
-$ npm run start:prod
+# Modo producción
+npm run build
+npm run start:prod
 ```
 
-## Run tests
+La API queda disponible en `http://localhost:3028/api/v1`.
 
-```bash
-# unit tests
-$ npm run test
+## Flujo de sincronización
 
-# e2e tests
-$ npm run test:e2e
+```
+Admin hace login
+    → GET /google/connect  (obtiene URL de OAuth2)
+    → Autoriza en Google
+    → Google redirige a /google/callback
+    → Se guardan los tokens en BD
 
-# test coverage
-$ npm run test:cov
+Admin ejecuta sync
+    → POST /videos/sync_manual
+    → Se obtienen todos los videos del canal vía YouTube Data API
+    → Se filtran los videos con soft delete previo
+    → Se hace upsert en la BD local
 ```
 
-## Deployment
+## Estructura del proyecto
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+src/
+├── modules/
+│   ├── auth/          # Registro, login, JWT strategy, guards
+│   ├── google/        # OAuth2 con Google, gestión de tokens
+│   ├── videos/        # CRUD de videos, sync, repositorio, DTOs, mapper
+│   ├── youtube/       # Llamadas a YouTube Data API
+│   └── downloader/    # Descarga de videos con youtube-dl-exec
+├── common/
+│   ├── guards/        # RoleGuard
+│   └── decorators/    # @Roles()
+└── main.ts
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Arquitectura de autenticación
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Registro y login con hash de contraseña via **bcrypt**
+- Tokens **JWT** firmados con payload `{ sub, email, role }`
+- Guard de roles (`RoleGuard`) para proteger rutas de `ADMIN`
+- Tokens de Google (access + refresh) almacenados en la entidad `User`, con renovación automática cuando expiran
