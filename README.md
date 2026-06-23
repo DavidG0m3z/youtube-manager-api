@@ -87,25 +87,24 @@ La plataforma virtual de la universidad tenía un flujo de UX roto: cada vez que
 Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
-# App
-APP_PORT=3028
+PORT=3000
+NODE_ENV=development
 
-# Base de datos
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=tu_password
+DB_USERNAME=root
+DB_PASSWORD=secret
 DB_NAME=youtube_manager
 
-# JWT
-JWT_SECRET=tu_jwt_secret
+JWT_SECRET=
+JWT_EXPIRES_IN=
 
-# Google OAuth2
-GOOGLE_CLIENT_ID=tu_client_id
-GOOGLE_CLIENT_SECRET=tu_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:3028/api/v1/google/callback
+YOUTUBE_API_KEY=
+YOUTUBE_CHANNEL_ID=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
 
-# Frontend
 URL_FRONT=http://localhost:5173
 ```
 
