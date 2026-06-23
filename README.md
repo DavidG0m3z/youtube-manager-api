@@ -13,7 +13,7 @@ La plataforma virtual de la universidad tenía un flujo de UX roto: cada vez que
 | NestJS 11 | Framework principal |
 | TypeScript | Lenguaje |
 | TypeORM | ORM |
-| MySQL | Base de datos |
+| MariaDB 10.11 (Docker) | Base de datos |
 | JWT + Passport | Autenticación y autorización |
 | Google APIs (googleapis) | OAuth2 + YouTube Data API |
 | youtube-dl-exec | Descarga de videos |
@@ -79,7 +79,7 @@ La plataforma virtual de la universidad tenía un flujo de UX roto: cada vez que
 ### Prerrequisitos
 
 - Node.js >= 18
-- MySQL corriendo localmente o en Docker
+- Docker y Docker Compose
 - Credenciales de Google OAuth2 (Google Cloud Console)
 
 ### Variables de entorno
@@ -111,7 +111,10 @@ URL_FRONT=http://localhost:5173
 ### Pasos
 
 ```bash
-# Instalar dependencias
+# 1. Levantar la base de datos con Docker
+docker compose up -d
+
+# 2. Instalar dependencias
 npm install
 
 # Modo desarrollo
@@ -143,6 +146,7 @@ Admin ejecuta sync
 ## Estructura del proyecto
 
 ```
+docker-compose.yml
 src/
 ├── modules/
 │   ├── auth/          # Registro, login, JWT strategy, guards
