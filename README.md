@@ -146,18 +146,52 @@ Admin ejecuta sync
 ## Estructura del proyecto
 
 ```
-docker-compose.yml
-src/
-├── modules/
-│   ├── auth/          # Registro, login, JWT strategy, guards
-│   ├── google/        # OAuth2 con Google, gestión de tokens
-│   ├── videos/        # CRUD de videos, sync, repositorio, DTOs, mapper
-│   ├── youtube/       # Llamadas a YouTube Data API
-│   └── downloader/    # Descarga de videos con youtube-dl-exec
-├── common/
-│   ├── guards/        # RoleGuard
-│   └── decorators/    # @Roles()
-└── main.ts
+youtube_manager_back/
+├── docker-compose.yml
+├── .env.example
+├── src/
+│   ├── app.module.ts
+│   ├── main.ts
+│   ├── config/
+│   │   ├── app.config.ts
+│   │   ├── database.config.ts
+│   │   └── youtube.config.ts
+│   ├── common/
+│   │   ├── decorators/
+│   │   │   └── roles.decorator.ts
+│   │   └── guards/
+│   │       └── roles.guards.ts
+│   └── modules/
+│       ├── auth/
+│       │   ├── dto/                  # RegisterDto, LoginDto, AuthResponseDto
+│       │   ├── entities/             # User entity (TypeORM)
+│       │   ├── enums/                # Role enum
+│       │   ├── strategies/           # JWT strategy (Passport)
+│       │   ├── auth.controller.ts
+│       │   ├── auth.service.ts
+│       │   ├── auth.module.ts
+│       │   └── users.repository.ts
+│       ├── google/
+│       │   ├── google.controller.ts  # OAuth2 connect/callback/unlink
+│       │   ├── google.service.ts     # Gestión de tokens OAuth2
+│       │   └── google.module.ts
+│       ├── youtube/
+│       │   ├── dto/                  # YoutubeVideosDto
+│       │   ├── youtube.service.ts    # Llamadas a YouTube Data API
+│       │   └── youtube.module.ts
+│       ├── videos/
+│       │   ├── dto/                  # VideoResponseDto, UpdateVideoDto
+│       │   ├── entities/             # Video entity (TypeORM)
+│       │   ├── mapper/               # VideoMapper (YouTube → entidad local)
+│       │   ├── videos.controller.ts
+│       │   ├── videos.service.ts
+│       │   ├── videos.repository.ts
+│       │   └── videos.module.ts
+│       └── downloader/
+│           ├── downloader.controller.ts  # Info, download, status, stream
+│           ├── downloader.service.ts
+│           └── downloader.module.ts
+└── test/
 ```
 
 ## Arquitectura de autenticación
