@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -34,6 +35,17 @@ export class DownloaderService {
       }
     }
     return null;
+  }
+
+  @Cron(CronExpression.EVERY_WEEK)
+  async autoUpdateYtDlp() {
+    this.logger.log('Iniciando actualización automática de yt-dlp (cron semanal)...');
+    try {
+      const output = await youtubedl('', { update: true });
+      this.logger.log(`Resultado de la actualización de yt-dlp:\n${output}`);
+    } catch (error: any) {
+      this.logger.error(`Error actualizando yt-dlp: ${error.message}`);
+    }
   }
 
   async getVideoInfo(rawUrl: string): Promise<any> {
@@ -157,19 +169,14 @@ export class DownloaderService {
 
     const filePath = path.join(this.downloadFolder, `${downloadId}.mp4`);
 
-    const isWin = os.platform() === 'win32';
-    const quote = (str: string) => (isWin ? `"${str}"` : str);
-
     const args: any = {
       noCheckCertificates: true,
-      userAgent: quote(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      ),
-      f: quote(formatString),
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      f: formatString,
       mergeOutputFormat: 'mp4',
-      o: quote(filePath),
+      o: filePath,
       newline: true,
-      ffmpegLocation: quote(ffmpegLoc || ''),
+      ffmpegLocation: ffmpegLoc,
       jsRuntimes: 'node',
     };
 

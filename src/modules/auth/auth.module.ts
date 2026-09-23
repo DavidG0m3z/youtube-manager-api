@@ -10,23 +10,23 @@ import { UsersRepository } from './users.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([User]),
-        PassportModule,
-        
-        JwtModule.registerAsync({
-          imports: [ConfigModule],
-          useFactory: (configService: ConfigService) => ({
-            secret: configService.get<string>('app.jwtSecret')!,
-            signOptions: {
-              expiresIn: configService.get<string>('app.jwtExpiresIn')! as any,
-            },
-          }),
-          inject: [ConfigService],
-        }),
-    ],
-    controllers: [AuthController],
-    providers: [AuthService, UsersRepository, JwtStrategy],
-    exports: [JwtStrategy, JwtModule, UsersRepository],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    PassportModule,
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('app.jwtSecret')!,
+        signOptions: {
+          expiresIn: configService.get<string>('app.jwtExpiresIn')! as any,
+        },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, UsersRepository, JwtStrategy],
+  exports: [JwtStrategy, JwtModule, UsersRepository],
 })
 export class AuthModule {}
